@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Globalization;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Smartstore.Core.Common.Services;
 
@@ -46,8 +47,14 @@ namespace Smartstore.Core.Common.JsonConverters
                     }
                 }
             }
-
-            _innerConverter.WriteJson(writer, value, serializer);
+            try
+            {
+                _innerConverter.WriteJson(writer, value, serializer);
+            }
+            catch
+            {
+                _innerConverter.WriteJson(writer, CultureInfo.CurrentCulture.Calendar.MinSupportedDateTime, serializer);
+            }
         }
     }
 }
