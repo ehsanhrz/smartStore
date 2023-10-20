@@ -1,0 +1,51 @@
+﻿@using System.Globalization
+@using Smartstore.Utilities
+@using Smartstore.Core.Stores
+
+@inject IStoreContext StoreContext
+
+@functions
+{
+    private int[] SelectedIds
+    {
+        get
+        {
+            if (ViewData.Model is int[] ids)
+            {
+                return ids;
+            }
+            else if (ViewData.Model != null)
+            {
+                if (ConvertUtility.TryConvert(ViewData.Model, typeof(string), CultureInfo.InvariantCulture, out object obj) && obj != null)
+                {
+                    return ((string)obj).ToIntArray();
+                }
+            }
+
+            return Array.Empty<int>();
+        }
+    }
+
+    private bool IsNullable
+    {
+        get
+        {
+            return !TryGetMetadata<bool>("nullable", out var nullable) || nullable == true;
+        }
+    }
+}
+
+@{
+    var items = StoreContext.GetAllStores().ToSelectListItems(SelectedIds);
+    var attributes = new AttributeDictionary().Merge(ConvertUtility.ObjectToDictionary(ViewData["htmlAttributes"] ?? new object()));
+}
+<select asp-for="@Model" 
+        asp-items="items" 
+        attrs="attributes"
+        class="edit-control"
+        data-editor="select">
+    @if (IsNullable)
+    {
+        <option value="">@T("Admin.Common.StoresAll")</option>
+    }
+</select>
